@@ -83,7 +83,8 @@ Configuration fields:
 
 ### File browser
 
-<img src="media/screenshot.png">
+ 
+![Screenshot](media/screenshot.png)
 
 - Split view with directory list on the left and preview on the right.
 - Navigation through relative paths.
