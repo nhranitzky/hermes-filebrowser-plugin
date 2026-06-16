@@ -1,4 +1,4 @@
-"""Static checks for the filebrowser dashboard bundle.
+"""Static checks for the fileviewer dashboard bundle.
 
 These are not a replacement for browser tests, but they pin the security-critical
 frontend decisions from SPEC.md: host SDK registration, authenticated SDK fetch,
@@ -8,15 +8,15 @@ sandboxed HTML iframe, raw Markdown HTML removal, and download/URL-state support
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_ROOT = PROJECT_ROOT / "filebrowser"
+PLUGIN_ROOT = PROJECT_ROOT / "fileviewer"
 JS = PLUGIN_ROOT / "dashboard" / "dist" / "index.js"
 CSS = PLUGIN_ROOT / "dashboard" / "dist" / "style.css"
 
 
-def test_bundle_registers_filebrowser_plugin():
+def test_bundle_registers_fileviewer_plugin():
     js = JS.read_text(encoding="utf-8")
-    assert "window.__HERMES_PLUGINS__.register(\"filebrowser\", FilebrowserPage)" in js
-    assert "const API = \"/api/plugins/filebrowser\"" in js
+    assert "window.__HERMES_PLUGINS__.register(\"fileviewer\", FileviewerPage)" in js
+    assert "const API = \"/api/plugins/fileviewer\"" in js
 
 
 def test_bundle_uses_sdk_fetch_json_for_auth():
@@ -133,3 +133,34 @@ def test_css_contains_split_view_and_mobile_layout():
     assert "@media (max-width: 900px)" in css
     assert "var(--color-card)" in css
     assert "hsl(var(--card" not in css
+
+
+def test_file_lists_and_markdown_use_compact_font_sizes():
+    css = CSS.read_text(encoding="utf-8")
+    assert ".fb-entry {" in css
+    assert "font-size: 0.8125rem;" in css
+    assert ".fb-filter" in css
+    assert ".fb-markdown {" in css
+    assert "font-size: 0.875rem;" in css
+    assert ".fb-markdown h1 { font-size: 1.45rem; }" in css
+    assert ".fb-markdown-table" in css
+
+
+def test_entry_icons_use_inline_lucide_style_svg_not_color_emoji():
+    js = JS.read_text(encoding="utf-8")
+    css = CSS.read_text(encoding="utf-8")
+    assert "function LucideIcon" in js
+    assert "viewBox: \"0 0 24 24\"" in js
+    assert "strokeLinecap: \"round\"" in js
+    assert "function folderIcon" in js
+    assert "function fileIcon" in js
+    assert "fb-entry-svg" in js
+    assert "\"PDF\"" in js
+    assert "📁" not in js
+    assert "📝" not in js
+    assert "🌐" not in js
+    assert "📄" not in js
+    assert "📦" not in js
+    assert "fb-entry-icon-" in js
+    assert ".fb-entry-svg" in css
+    assert ".fb-entry-file-badge" in css

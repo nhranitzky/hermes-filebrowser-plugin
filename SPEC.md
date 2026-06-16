@@ -1,16 +1,16 @@
-# Hermes Dashboard Filebrowser Plugin Specification
+# Hermes Dashboard Fileviewer Plugin Specification
 
 Version: 0.1.0
 Status: Draft / MVP specification
-Plugin name: `filebrowser`
-Dashboard tab label: `Filebrowser`
-Dashboard tab path: `/filebrowser`
-API base path: `/api/plugins/filebrowser/`
-Configuration section: `plugins.filebrowser`
+Plugin name: `fileviewer`
+Dashboard tab label: `Fileviewer`
+Dashboard tab path: `/fileviewer`
+API base path: `/api/plugins/fileviewer/`
+Configuration section: `plugins.fileviewer`
 
 ## 1. Goal
 
-The `filebrowser` plugin adds read-only file browsing functionality to the Hermes dashboard.
+The `fileviewer` plugin adds read-only file browsing functionality to the Hermes dashboard.
 
 It allows an authenticated dashboard user to browse a configured root directory and preview selected files in the dashboard.
 
@@ -89,7 +89,7 @@ The plugin relies on the existing Hermes dashboard authentication layer.
 
 Requirements:
 
-- Plugin routes are mounted under `/api/plugins/filebrowser/`.
+- Plugin routes are mounted under `/api/plugins/fileviewer/`.
 - Routes must be protected by the dashboard's existing plugin API authentication.
 - The plugin does not implement its own password/session system.
 - The plugin should not expose anonymous routes.
@@ -99,13 +99,13 @@ No per-user role system is part of the MVP.
 
 ## 5. Configuration
 
-Configuration lives under `plugins.filebrowser` in the Hermes configuration.
+Configuration lives under `plugins.fileviewer` in the Hermes configuration.
 
 Example:
 
 ```yaml
 plugins:
-  filebrowser:
+  fileviewer:
     enabled: true
     root: /opt/data/documents
     title: Reports
@@ -122,7 +122,7 @@ plugins:
 Fields:
 
 - `enabled`: boolean. Default: `false` if missing.
-- `root`: absolute path to the filebrowser root. Required when enabled.
+- `root`: absolute path to the fileviewer root. Required when enabled.
 - `title`: display label for the configured root in the left browser pane. Default: `Root`.
 - `allowed_extensions`: list of extensions. Default: `.md`, `.markdown`, `.html`, `.htm`, `.pdf`.
 - `markdown_max_bytes`: maximum Markdown file size loaded into JSON. Default: 5 MiB.
@@ -147,8 +147,8 @@ If configuration is invalid, the plugin should still load so the UI can show a r
 Recommended repository layout:
 
 ```text
-hermes-filebrowser-plugin/
-├── filebrowser/
+hermes-fileviewer-plugin/
+├── fileviewer/
 │   ├── plugin.yaml
 │   ├── __init__.py
 │   └── dashboard/
@@ -158,24 +158,24 @@ hermes-filebrowser-plugin/
 │           ├── index.js
 │           └── style.css
 ├── tests/
-│   ├── test_filebrowser_api.py
-│   └── test_filebrowser_frontend_static.py
+│   ├── test_fileviewer_api.py
+│   └── test_fileviewer_frontend_static.py
 ├── README.md
 ├── SPEC.md
 └── Makefile
 ```
 
-`filebrowser/dashboard/manifest.json`:
+`fileviewer/dashboard/manifest.json`:
 
 ```json
 {
-  "name": "filebrowser",
-  "label": "Filebrowser",
-  "description": "Read-only file browser for a configured document root",
+  "name": "fileviewer",
+  "label": "Fileviewer",
+  "description": "Read-only file viewer for a configured document root",
   "icon": "FolderOpen",
   "version": "0.1.0",
   "tab": {
-    "path": "/filebrowser",
+    "path": "/fileviewer",
     "position": "after:skills"
   },
   "entry": "dist/index.js",
@@ -189,7 +189,7 @@ hermes-filebrowser-plugin/
 All endpoints are mounted under:
 
 ```text
-/api/plugins/filebrowser/
+/api/plugins/fileviewer/
 ```
 
 ### 7.1 `GET /config`
@@ -217,7 +217,7 @@ Response when not configured:
 {
   "enabled": false,
   "configured": false,
-  "error": "Filebrowser is not configured"
+  "error": "Fileviewer is not configured"
 }
 ```
 
@@ -358,7 +358,7 @@ X-Content-Type-Options: nosniff
 
 ## 8. Frontend behavior
 
-The plugin adds a dashboard tab at `/filebrowser` labeled `Filebrowser`.
+The plugin adds a dashboard tab at `/fileviewer` labeled `Fileviewer`.
 
 Layout:
 
@@ -398,7 +398,7 @@ Preview behavior:
 - Unsupported files:
   - not shown in the MVP
 
-The plugin should use existing dashboard theme tokens and components where possible. It should not load external fonts, external CSS, or external JavaScript. It must not duplicate the dashboard shell's top-level `Filebrowser` title inside the tab content; the configured root `title` is shown inside the browser panel instead. Secondary actions use compact glyph controls (`↰` for parent directory, `⤓` for download, `ⓘ` for frontmatter).
+The plugin should use existing dashboard theme tokens and components where possible. It should not load external fonts, external CSS, or external JavaScript. It must not duplicate the dashboard shell's top-level `Fileviewer` title inside the tab content; the configured root `title` is shown inside the browser panel instead. Secondary actions use compact glyph controls (`↰` for parent directory, `⤓` for download, `ⓘ` for frontmatter).
 
 ## 9. URL state and deep links
 
@@ -407,7 +407,7 @@ The current directory and selected file should be represented in the dashboard U
 Example:
 
 ```text
-/filebrowser?path=reports/2026&file=summary.md
+/fileviewer?path=reports/2026&file=summary.md
 ```
 
 Rules:
@@ -464,7 +464,7 @@ Behavior:
 Use a temporary test root, for example:
 
 ```text
-/tmp/filebrowser-root/
+/tmp/fileviewer-root/
 ├── docs/
 │   ├── readme.md
 │   ├── page.html
@@ -506,7 +506,7 @@ Backend tests:
 
 Frontend smoke tests:
 
-- Dashboard tab appears as `Filebrowser`.
+- Dashboard tab appears as `Fileviewer`.
 - Root listing loads.
 - Breadcrumb navigation works.
 - Current-directory filter works.
@@ -527,7 +527,7 @@ Frontend smoke tests:
 Recommended order:
 
 1. Create plugin skeleton.
-2. Add dashboard manifest with `/filebrowser` tab.
+2. Add dashboard manifest with `/fileviewer` tab.
 3. Implement backend config loader and validation.
 4. Implement safe path resolution helpers.
 5. Implement `/config`.
@@ -548,13 +548,13 @@ Recommended order:
 Develop first outside the active Hermes profile:
 
 ```text
-/opt/data/workspace/hermes-filebrowser-plugin
+/opt/data/workspace/hermes-fileviewer-plugin
 ```
 
-After tests pass, install the `filebrowser/` plugin directory into the active profile. The install target is configured via project-local `.env`:
+After tests pass, install the `fileviewer/` plugin directory into the active profile. The install target is configured via project-local `.env`:
 
 ```text
-PLUGIN_INSTALL_DIR=/opt/data/plugins/filebrowser
+PLUGIN_INSTALL_DIR=/opt/data/plugins/fileviewer
 ```
 
 Then run:
@@ -563,7 +563,7 @@ Then run:
 make install
 ```
 
-`make install` uses `rsync --delete` from `filebrowser/` to `PLUGIN_INSTALL_DIR`.
+`make install` uses `rsync --delete` from `fileviewer/` to `PLUGIN_INSTALL_DIR`.
 
 Distribution packages are built with tar:
 
@@ -574,10 +574,10 @@ make dist
 This creates:
 
 ```text
-dist/filebrowser-0.1.0.tar.gz
+dist/fileviewer-0.1.0.tar.gz
 ```
 
-The tarball contains the installable `filebrowser/` plugin directory and `filebrowser/README.md`; it excludes tests, caches, `SPEC.md`, `Makefile`, and `.env`.
+The tarball contains the installable `fileviewer/` plugin directory and `fileviewer/README.md`; it excludes tests, caches, `SPEC.md`, `Makefile`, and `.env`.
 
 Temporary artifacts can be removed with:
 

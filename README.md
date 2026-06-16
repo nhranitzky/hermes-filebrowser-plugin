@@ -1,12 +1,12 @@
-# Hermes Filebrowser Plugin
+# Hermes Fileviewer Plugin
 
-Read-only dashboard plugin for Hermes Agent. The plugin exposes one configured root directory in the Hermes Dashboard as a safe file browser and can preview supported document files directly.
+Read-only dashboard plugin for Hermes Agent. The plugin exposes one configured root directory in the Hermes Dashboard as a safe file viewer and can preview supported document files directly.
 
 Version: `0.1.0`
 
 ## Quick introduction
 
-The plugin adds a `Filebrowser` tab to the Hermes Dashboard at `/filebrowser`. It shows exactly one server-side configured root directory and only allows read access.
+The plugin adds a `Fileviewer` tab to the Hermes Dashboard at `/fileviewer`. It shows exactly one server-side configured root directory and only allows read access.
 
 Supported document types in the MVP:
 
@@ -26,12 +26,12 @@ These image files are not shown as standalone documents in the file list by defa
 
 ## Installation
 
-The plugin directory must be installed in the Hermes profile under `plugins/filebrowser`.
+The plugin directory must be installed in the Hermes profile under `plugins/fileviewer`.
 
 Set the install target in `.env`:
 
 ```bash
-PLUGIN_INSTALL_DIR=/opt/data/plugins/filebrowser
+PLUGIN_INSTALL_DIR=/opt/data/plugins/fileviewer
 ```
 
 Install with:
@@ -40,13 +40,13 @@ Install with:
 make install
 ```
 
-The `install` target uses `rsync --delete` to copy only the runtime plugin directory `filebrowser/` into `PLUGIN_INSTALL_DIR`.
+The `install` target uses `rsync --delete` to copy only the runtime plugin directory `fileviewer/` into `PLUGIN_INSTALL_DIR`.
 
 For development, a symlink is also possible:
 
 ```bash
 mkdir -p /opt/data/plugins
-ln -sfn /opt/data/workspace/hermes-filebrowser-plugin/filebrowser /opt/data/plugins/filebrowser
+ln -sfn /opt/data/workspace/hermes-fileviewer-plugin/fileviewer /opt/data/plugins/fileviewer
 ```
 
 After changes to `dashboard/plugin_api.py` or the plugin configuration, restart the Hermes Dashboard. FastAPI routes from dashboard plugins are imported and mounted at dashboard startup.
@@ -73,13 +73,13 @@ The rescan endpoint is protected by dashboard authentication and should be opene
 
 ## Configuration
 
-The configuration lives under `plugins.filebrowser` in the Hermes configuration.
+The configuration lives under `plugins.fileviewer` in the Hermes configuration.
 
 Example:
 
 ```yaml
 plugins:
-  filebrowser:
+  fileviewer:
     enabled: true
     root: /opt/merkur/reports
     title: Reports
@@ -97,17 +97,17 @@ plugins:
 Recommended setup via the Hermes CLI:
 
 ```bash
-hermes config set plugins.filebrowser.enabled true
-hermes config set plugins.filebrowser.root /opt/merkur/reports
-hermes config set plugins.filebrowser.title Reports
-hermes config set plugins.filebrowser.markdown_max_bytes 5242880
-hermes config set plugins.filebrowser.max_entries_per_directory 1000
+hermes config set plugins.fileviewer.enabled true
+hermes config set plugins.fileviewer.root /opt/merkur/reports
+hermes config set plugins.fileviewer.title Reports
+hermes config set plugins.fileviewer.markdown_max_bytes 5242880
+hermes config set plugins.fileviewer.max_entries_per_directory 1000
 ```
 
 `allowed_extensions` must be a real YAML list, not one single string. Check the stored configuration if needed:
 
 ```bash
-hermes config get plugins.filebrowser
+hermes config get plugins.fileviewer
 ```
 
 Configuration fields:
@@ -166,7 +166,7 @@ Security model:
 HTML previews use a path-shaped raw route:
 
 ```text
-/api/plugins/filebrowser/raw-path/<relative-file>
+/api/plugins/fileviewer/raw-path/<relative-file>
 ```
 
 This allows relative assets such as:
@@ -208,7 +208,7 @@ Status codes:
 
 ## API endpoints
 
-The API is mounted under `/api/plugins/filebrowser`:
+The API is mounted under `/api/plugins/fileviewer`:
 
 ```text
 GET /config
@@ -221,8 +221,8 @@ GET /raw-path/<relative-file>?mode=inline|download
 ## Packaging and maintenance
 
 ```bash
-make dist      # builds dist/filebrowser-0.1.0.tar.gz
-make install   # rsyncs filebrowser/ to PLUGIN_INSTALL_DIR from .env
+make dist      # builds dist/fileviewer-0.1.0.tar.gz
+make install   # rsyncs fileviewer/ to PLUGIN_INSTALL_DIR from .env
 make clean     # removes dist/, .build, pytest cache, and __pycache__ directories
 ```
 
@@ -233,9 +233,9 @@ The distribution archive contains the installable plugin directory plus `README.
 Run tests from the project directory:
 
 ```bash
-cd /opt/data/workspace/hermes-filebrowser-plugin
+cd /opt/data/workspace/hermes-fileviewer-plugin
 uv run --with pytest --with fastapi --with httpx --with pyyaml python -m pytest tests/ -q
-node --check filebrowser/dashboard/dist/index.js
+node --check fileviewer/dashboard/dist/index.js
 ```
 
 Current verified state:

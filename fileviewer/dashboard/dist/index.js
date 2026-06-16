@@ -15,7 +15,7 @@
   const CardContent = C.CardContent || "div";
   const Input = C.Input || "input";
 
-  const API = "/api/plugins/filebrowser";
+  const API = "/api/plugins/fileviewer";
   const BASE_PATH = (function () {
     const raw = window.__HERMES_BASE_PATH__ || "";
     if (!raw) return "";
@@ -281,12 +281,36 @@
     return (n / (1024 * 1024)).toFixed(1) + " MB";
   }
 
+  function LucideIcon(props) {
+    return h("svg", {
+      className: props.className,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      "aria-hidden": "true",
+    }, props.children);
+  }
+
+  function folderIcon() {
+    return h(LucideIcon, { className: "fb-entry-svg" }, [
+      h("path", { key: "folder-body", d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" }),
+    ]);
+  }
+
+  function fileIcon() {
+    return h(LucideIcon, { className: "fb-entry-svg" }, [
+      h("path", { key: "file-body", d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" }),
+      h("path", { key: "file-fold", d: "M14 2v4a2 2 0 0 0 2 2h4" }),
+    ]);
+  }
+
   function iconFor(entry) {
-    if (entry.kind === "directory") return "📁";
-    if (entry.kind === "markdown") return "📝";
-    if (entry.kind === "html") return "🌐";
-    if (entry.kind === "pdf") return "📄";
-    return "📦";
+    if (entry.kind === "directory") return folderIcon();
+    if (entry.kind === "pdf") return h("span", { className: "fb-entry-file-badge", "aria-hidden": "true" }, "PDF");
+    return fileIcon();
   }
 
   function Breadcrumb(props) {
@@ -315,7 +339,7 @@
         onClick: function () { entry.kind === "directory" ? props.onNavigate(entry.path) : props.onSelect(entry); },
         title: entry.path,
       },
-        h("span", { className: "fb-entry-icon" }, iconFor(entry)),
+        h("span", { className: "fb-entry-icon fb-entry-icon-" + entry.kind, "aria-hidden": "true" }, iconFor(entry)),
           h("span", { className: "fb-entry-main" },
           h("span", { className: "fb-entry-name" }, entry.name),
           entry.kind === "directory" ? null : h("span", { className: "fb-entry-meta" }, entry.kind + (entry.size ? " · " + fmtSize(entry.size) : ""))
@@ -373,7 +397,7 @@
     );
   }
 
-  function FilebrowserPage() {
+  function FileviewerPage() {
     const initial = queryState();
     const [config, setConfig] = useState(null);
     const [path, setPath] = useState(initial.path);
@@ -462,7 +486,7 @@
     if (config && !config.configured) {
       return h("div", { className: "fb-root" },
         h(Card, { className: "fb-card" }, h(CardContent, { className: "fb-card-content" },
-          h("div", { className: "fb-error" }, config.error || "Filebrowser is not configured.")
+          h("div", { className: "fb-error" }, config.error || "Fileviewer is not configured.")
         ))
       );
     }
@@ -497,6 +521,6 @@
   }
 
   if (typeof window.__HERMES_PLUGINS__.register === "function") {
-    window.__HERMES_PLUGINS__.register("filebrowser", FilebrowserPage);
+    window.__HERMES_PLUGINS__.register("fileviewer", FileviewerPage);
   }
 })();

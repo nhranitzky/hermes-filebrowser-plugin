@@ -1,0 +1,3 @@
+name: fileviewer
+version: "0.1.0"
+description: Read-only Hermes dashboard fileviewer for a configured document root

@@ -1,8 +1,8 @@
 .PHONY: dist install clean
 
-PLUGIN_NAME := filebrowser
+PLUGIN_NAME := fileviewer
 VERSION := 0.1.0
-PLUGIN_DIR := filebrowser
+PLUGIN_DIR := fileviewer
 DIST_DIR := dist
 BUILD_DIR := .build/$(PLUGIN_NAME)
 TAR_FILE := $(DIST_DIR)/$(PLUGIN_NAME)-$(VERSION).tar.gz
@@ -15,7 +15,7 @@ endif
 PLUGIN_INSTALL_DIR ?= $(HOME)/.hermes/plugins/$(PLUGIN_NAME)
 
 # Build an installable plugin archive using tar.
-# Included: runtime plugin files under filebrowser/ plus root README.md.
+# Included: runtime plugin files under fileviewer/ plus root README.md.
 # Excluded: tests, caches, SPEC.md, Makefile, .env, and other development-only files.
 dist:
 	@rm -rf .build $(DIST_DIR)
@@ -30,7 +30,7 @@ dist:
 
 # Install the runtime plugin directory into PLUGIN_INSTALL_DIR from .env.
 # Example .env:
-#   PLUGIN_INSTALL_DIR=/opt/data/plugins/filebrowser
+#   PLUGIN_INSTALL_DIR=/opt/data/plugins/fileviewer
 install:
 	@command -v rsync >/dev/null 2>&1 || { echo "rsync is required for make install"; exit 127; }
 	@test -n "$(PLUGIN_INSTALL_DIR)" || { echo "PLUGIN_INSTALL_DIR is empty"; exit 1; }

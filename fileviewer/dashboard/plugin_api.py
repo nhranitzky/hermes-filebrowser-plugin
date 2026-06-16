@@ -1,6 +1,6 @@
-"""Filebrowser dashboard plugin API.
+"""Fileviewer dashboard plugin API.
 
-Mounted by the Hermes dashboard plugin system at /api/plugins/filebrowser/.
+Mounted by the Hermes dashboard plugin system at /api/plugins/fileviewer/.
 The API is intentionally read-only and exposes only files below one configured
 root directory.
 """
@@ -42,7 +42,7 @@ PDF_CSP = "sandbox; default-src 'none'; frame-ancestors 'self'"
 
 
 @dataclass(frozen=True)
-class FilebrowserConfig:
+class FileviewerConfig:
     enabled: bool
     configured: bool
     root: Path | None
@@ -87,15 +87,15 @@ def _positive_int(raw: Any, default: int, name: str) -> int:
     return value
 
 
-def _load_filebrowser_config() -> FilebrowserConfig:
+def _load_fileviewer_config() -> FileviewerConfig:
     try:
         cfg = load_config() or {}
         plugins = cfg.get("plugins") if isinstance(cfg, dict) else {}
-        section = plugins.get("filebrowser") if isinstance(plugins, dict) else {}
+        section = plugins.get("fileviewer") if isinstance(plugins, dict) else {}
         if section is None:
             section = {}
         if not isinstance(section, dict):
-            raise ValueError("plugins.filebrowser must be a mapping")
+            raise ValueError("plugins.fileviewer must be a mapping")
 
         enabled = bool(section.get("enabled", False))
         allowed = _normalize_extensions(section.get("allowed_extensions"))
@@ -114,7 +114,7 @@ def _load_filebrowser_config() -> FilebrowserConfig:
 
         root_raw = section.get("root")
         if not enabled:
-            return FilebrowserConfig(
+            return FileviewerConfig(
                 enabled=False,
                 configured=False,
                 root=None,
@@ -122,20 +122,20 @@ def _load_filebrowser_config() -> FilebrowserConfig:
                 allowed_extensions=allowed,
                 markdown_max_bytes=markdown_max,
                 max_entries_per_directory=max_entries,
-                error="Filebrowser is disabled",
+                error="Fileviewer is disabled",
             )
         if not isinstance(root_raw, str) or not root_raw.strip():
-            raise ValueError("plugins.filebrowser.root is required when enabled")
+            raise ValueError("plugins.fileviewer.root is required when enabled")
         root = Path(root_raw).expanduser()
         if not root.is_absolute():
-            raise ValueError("plugins.filebrowser.root must be an absolute path")
+            raise ValueError("plugins.fileviewer.root must be an absolute path")
         root = root.resolve()
         if not root.exists():
             raise ValueError("configured root does not exist")
         if not root.is_dir():
             raise ValueError("configured root is not a directory")
 
-        return FilebrowserConfig(
+        return FileviewerConfig(
             enabled=True,
             configured=True,
             root=root,
@@ -145,8 +145,8 @@ def _load_filebrowser_config() -> FilebrowserConfig:
             max_entries_per_directory=max_entries,
         )
     except Exception as exc:
-        log.warning("filebrowser configuration invalid: %s", exc)
-        return FilebrowserConfig(
+        log.warning("fileviewer configuration invalid: %s", exc)
+        return FileviewerConfig(
             enabled=False,
             configured=False,
             root=None,
@@ -158,19 +158,19 @@ def _load_filebrowser_config() -> FilebrowserConfig:
         )
 
 
-CONFIG = _load_filebrowser_config()
+CONFIG = _load_fileviewer_config()
 
 
-def reload_config_for_tests() -> FilebrowserConfig:
+def reload_config_for_tests() -> FileviewerConfig:
     """Reload module-level config. Intended for tests only."""
     global CONFIG
-    CONFIG = _load_filebrowser_config()
+    CONFIG = _load_fileviewer_config()
     return CONFIG
 
 
-def _require_config() -> FilebrowserConfig:
+def _require_config() -> FileviewerConfig:
     if not CONFIG.enabled or not CONFIG.configured or CONFIG.root is None:
-        raise HTTPException(status_code=503, detail=CONFIG.error or "Filebrowser is not configured")
+        raise HTTPException(status_code=503, detail=CONFIG.error or "Fileviewer is not configured")
     return CONFIG
 
 
@@ -329,10 +329,10 @@ def _visible_entries(directory: Path) -> Iterable[Path]:
             if child.is_file() and child.suffix.lower() in cfg.allowed_extensions:
                 yield child
         except PermissionError:
-            log.info("filebrowser skipping unreadable entry: %s", child)
+            log.info("fileviewer skipping unreadable entry: %s", child)
             continue
         except OSError as exc:
-            log.info("filebrowser skipping entry %s: %s", child, exc)
+            log.info("fileviewer skipping entry %s: %s", child, exc)
             continue
 
 
@@ -366,7 +366,7 @@ async def get_config() -> dict[str, Any]:
         "allowed_extensions": list(CONFIG.allowed_extensions),
         "markdown_max_bytes": CONFIG.markdown_max_bytes,
         "max_entries_per_directory": CONFIG.max_entries_per_directory,
-        "error": None if CONFIG.configured else (CONFIG.error or "Filebrowser is not configured"),
+        "error": None if CONFIG.configured else (CONFIG.error or "Fileviewer is not configured"),
     }
 
 
